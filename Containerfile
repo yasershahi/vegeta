@@ -96,17 +96,19 @@ RUN <<-'EOT' sh
 		net-tools
 		
 	# Add Microsoft repository for VSCode
-	rpm-ostree install \
-		https://packages.microsoft.com/keys/microsoft.asc \
-		https://packages.microsoft.com/config/rpm/7/prod.repo
+	cat <<EOF > /etc/yum.repos.d/vscode.repo
+	[code]
+	name=Visual Studio Code
+	baseurl=https://packages.microsoft.com/yumrepos/vscode
+	gpgcheck=1
+	gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+	enabled=1
+	EOF
 
 	# Install Visual Studio Code
 	rpm-ostree install code
 
 	# Add Google Chrome repository
-	rpm-ostree install \
-		https://dl.google.com/linux/linux_signing_key.pub
-
 	cat <<EOF > /etc/yum.repos.d/google-chrome.repo
 	[google-chrome]
 	name=google-chrome
