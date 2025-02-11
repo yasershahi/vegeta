@@ -1,57 +1,47 @@
-# Version Reference
-ARG FEDORA_MAJOR_VERSION=40
+ARG FEDORA_MAJOR_VERSION=41
 
-# Use the Fedora base image for the builder stage
 FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
 
-# Set the working directory
 WORKDIR /tmp
-
-# Install essential packages
-RUN dnf install -y git xz --setopt=install_weak_deps=False || { echo "Failed to install git and xz"; exit 1; }
-
-# Install Homebrew for x86_64 architecture
-RUN <<-EOT
+RUN <<-EOT sh
 	set -eu
-	set -x  # Enable debugging output
 
-	case "\$(rpm -E %{_arch})" in
+	touch /.dockerenv
+
+	# Install packages
+	dnf install -y git xz --setopt=install_weak_deps=False
+
+	# Install Homebrew
+	case "$(rpm -E %{_arch})" in
 		x86_64)
-			curl -fLs https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s
+			curl -fLs \
+				https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s
 			/home/linuxbrew/.linuxbrew/bin/brew update
 			;;
 		*)
-			mkdir -p /home/linuxbrew
+			mkdir /home/linuxbrew
 			;;
 	esac
 EOT
 
-# Use the Fedora Silverblue base image for the final stage
 FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
 
-# Copy necessary files from the builder stage
 COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
-# Install packages and configure the system
-RUN <<-'EOT'
+RUN <<-'EOT' sh
 	set -eu
-	set -x  # Enable debugging output
 
-	# Install essential development tools
 	rpm-ostree install gcc make libxcrypt-compat
 
-	# Install RPMFusion repositories
 	rpm-ostree install \
 		https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
 		https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-
-	# Install RPMFusion packages
 	rpm-ostree install rpmfusion-free-release rpmfusion-nonfree-release \
 		--uninstall rpmfusion-free-release \
 		--uninstall rpmfusion-nonfree-release
-
+		
 	# Remove specified GNOME shell extensions
 	rpm-ostree override remove \
 		gnome-shell-extension-apps-menu \
@@ -60,8 +50,7 @@ RUN <<-'EOT'
 		gnome-shell-extension-window-list \
 		gnome-shell-extension-background-logo || true
 
-	# Remove free versions of multimedia libraries and install alternatives
-	rpm-ostree override remove \
+	(rpm-ostree override remove \
 		ffmpeg-free \
 		libavcodec-free \
 		libavdevice-free \
@@ -76,13 +65,12 @@ RUN <<-'EOT'
 		--install=gstreamer1-plugins-bad-free-extras \
 		--install=gstreamer1-plugins-bad-freeworld \
 		--install=gstreamer1-plugins-ugly \
-		--install=gstreamer1-vaapi || true
+		--install=gstreamer1-vaapi) || true
 
-	# Install additional drivers
-	rpm-ostree override remove \
+	(rpm-ostree override remove \
 		mesa-va-drivers \
 		--install=mesa-va-drivers-freeworld \
-		--install=mesa-vdpau-drivers-freeworld || true
+		--install=mesa-vdpau-drivers-freeworld) || true
 
 	case "$(rpm -E %{_arch})" in
 		x86_64)
@@ -90,10 +78,8 @@ RUN <<-'EOT'
 			rpm-ostree install intel-media-driver libva-intel-driver
 			;;
 	esac
-
-	# Install NVIDIA driver
 	rpm-ostree install libva-nvidia-driver
-
+	
 	# Install additional packages
 	rpm-ostree install \
 		tailscale \
@@ -107,22 +93,16 @@ RUN <<-'EOT'
 		sstp-client \
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
-		net-tools
+		net-tools \
+		code \
+		google-chrome-stable
 
-	# Install Visual Studio Code
-	rpm-ostree install code
-
-	# Install Google Chrome
-	rpm-ostree install google-chrome-stable
-
-	# Enable systemd services
+	# New commands added here
 	systemctl enable dconf-update.service
 	systemctl enable flatpak-add-flathub-repo.service
 	systemctl enable flatpak-replace-fedora-apps.service
 	systemctl enable flatpak-cleanup.timer
-	systemctl enable rpm-ostreed
 	systemctl enable rpm-ostreed-automatic.timer
 
-	# Perform cleanup and commit the changes
 	rpm-ostree cleanup -m && ostree container commit
 EOT
