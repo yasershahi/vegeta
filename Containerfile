@@ -1,22 +1,18 @@
-# Define the Fedora major version as a build argument
-ARG FEDORA_MAJOR_VERSION=41
-
 # Use the Fedora base image for the builder stage
 FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
 
 # Set the working directory
 WORKDIR /tmp
 
-# Install necessary packages and Homebrew
+# Install essential packages
+RUN dnf install -y git xz --setopt=install_weak_deps=False || { echo "Failed to install git and xz"; exit 1; }
+
+# Install Homebrew for x86_64 architecture
 RUN <<-EOT
 	set -eu
 	set -x  # Enable debugging output
 
-	# Install essential packages
-	dnf install -y git xz --setopt=install_weak_deps=False
-
-	# Install Homebrew for x86_64 architecture
-	case "$(rpm -E %{_arch})" in
+	case "\$(rpm -E %{_arch})" in
 		x86_64)
 			curl -fLs https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s
 			/home/linuxbrew/.linuxbrew/bin/brew update
