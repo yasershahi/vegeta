@@ -1,10 +1,9 @@
 [BlueFusion][1]
 ===============
 
-[![build-image](https://github.com/aguslr/bluefusion/actions/workflows/build.yml/badge.svg)](https://github.com/aguslr/bluefusion/actions/workflows/build.yml)
+[![build-image](https://github.com/yasershahi/vegeta/actions/workflows/build.yml/badge.svg)](https://github.com/yasershahi/vegeta/actions/workflows/build.yml)
 
-A Fedora Silverblue image that adds RPM Fusion with media codecs and integrates
-both [Homebrew][9] and [Nix][12].
+ A Fedora Silverblue image that adds RPM Fusion with media codecs, patches mutter and integrates [Homebrew][9].
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset=".github/screenshot-light.png">
@@ -17,11 +16,11 @@ Usage
 
 1. Rebase to an unsigned image to get proper signing keys:
 
-       rpm-ostree rebase -r ostree-unverified-registry:ghcr.io/aguslr/bluefusion:stable
+       rpm-ostree rebase -r ostree-unverified-registry:ghcr.io/yasershahi/vegeta:stable
 
 2. Rebase to a signed image to finish the installation:
 
-       rpm-ostree rebase -r ostree-image-signed:docker://ghcr.io/aguslr/bluefusion:stable
+       rpm-ostree rebase -r ostree-image-signed:docker://ghcr.io/yasershahi/vegeta:stable
 
 Alternatively, an [ISO file for offline installation][8] can be generated with
 the following command:
@@ -39,18 +38,13 @@ Features
 --------
 
 - Start with a custom Fedora Silverblue image.
-- Install [Distrobox][3].
 - Install [Homebrew][9] on `x86_64`.
-- Install [Nix][12].
 - Add RPM Fusion repositories and several multimedia packages.
 
 To enable **Homebrew** just run:
 
     sudo systemctl enable --now var-home-linuxbrew.mount
 
-And to enable **Nix** run:
-
-    sudo systemctl enable --now nix.mount
 
 Verification
 ------------
@@ -59,7 +53,7 @@ These images are signed with Sisgstore's [Cosign][4]. You can verify the
 signature by downloading the `cosign.pub` key from this repo and running the
 following command:
 
-    cosign verify --key cosign.pub ghcr.io/aguslr/bluefusion
+    cosign verify --key cosign.pub ghcr.io/yasershahi/vegeta
 
 References
 ----------
