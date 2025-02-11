@@ -1,29 +1,36 @@
-[Vegeta][1]
-===============
+<div dir="rtl">
+
+# وجیتا
+
 
 [![build-image](https://github.com/yasershahi/vegeta/actions/workflows/build.yml/badge.svg)](https://github.com/yasershahi/vegeta/actions/workflows/build.yml)
 
- A Fedora Silverblue image that adds RPM Fusion with media codecs, patches mutter and integrates [Homebrew][9].
+ یک تصویر فدورا سیلوربلو که RPM Fusion را با کدک‌های رسانه‌ای اضافه می‌کند و [هومبرو][9] را یکپارچه می‌کند.
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset=".github/screenshot-light.png">
   <source media="(prefers-color-scheme: dark)"  srcset=".github/screenshot-dark.png">
-  <img title="Screenshot" alt="Screenshot" src=".github/screenshot-light.png">
+  <img title="تصویر صفحه" alt="تصویر صفحه" src=".github/screenshot-light.png">
 </picture>
 
-Usage
+استفاده
 -----
 
-1. Rebase to an unsigned image to get proper signing keys:
+1. به یک تصویر بدون امضا تغییر پایه دهید تا کلیدهای امضای مناسب را دریافت کنید:
+</div>
 
        rpm-ostree rebase -r ostree-unverified-registry:ghcr.io/yasershahi/vegeta:stable
 
-2. Rebase to a signed image to finish the installation:
+<div dir="rtl">
+2. به یک تصویر امضا شده تغییر پایه دهید تا نصب را کامل کنید:
+</div>
 
        rpm-ostree rebase -r ostree-image-signed:docker://ghcr.io/yasershahi/vegeta:stable
 
-Alternatively, an [ISO file for offline installation][8] can be generated with
-the following command:
+<div dir="rtl">
+به‌طور جایگزین، یک [فایل ISO برای نصب آفلاین][8] می‌تواند با
+دستور زیر تولید شود:
+</div>
 
     sudo podman run --rm --privileged \
         --volume .:/build-container-installer/build \
@@ -34,40 +41,46 @@ the following command:
         IMAGE_TAG="latest" \
         VARIANT="Silverblue"
 
-Features
+<div dir="rtl">
+
+ویژگی‌ها
 --------
 
-- Start with a custom Fedora Silverblue image.
-- Install [Homebrew][9] on `x86_64`.
-- Add RPM Fusion repositories and several multimedia packages.
+- با یک تصویر سفارشی فدورا سیلوربلو شروع کنید.
+- [هومبرو][9] را بر روی `x86_64` نصب کنید.
+- مخازن RPM Fusion و چندین بسته چندرسانه‌ای را اضافه کنید.
 
-To enable **Homebrew** just run:
+برای فعال‌سازی **هومبرو** فقط دستور زیر را اجرا کنید:
+</div>
 
     sudo systemctl enable --now var-home-linuxbrew.mount
 
+<div dir="rtl">
 
-Verification
+تأیید
 ------------
 
-These images are signed with Sisgstore's [Cosign][4]. You can verify the
-signature by downloading the `cosign.pub` key from this repo and running the
-following command:
+این تصاویر با [Cosign][4] سیگ‌استور امضا شده‌اند. شما می‌توانید
+امضا را با دانلود کلید `cosign.pub` از این مخزن و اجرای
+دستور زیر تأیید کنید:
+</div>
 
     cosign verify --key cosign.pub ghcr.io/yasershahi/vegeta
+<div dir="rtl">
 
-References
+منابع
 ----------
 
-- [Building your own custom Fedora Silverblue image][5]
-- [Howto/OSTree - RPM Fusion][6]
-- [Cosign - Sigstore Documentation][4]
-- [Making your Own - Universal Blue][7]
-- [feat: homebrew on image by m2Giles · Pull Request #1128 · ublue-os/bazzite ·
-  GitHub][10]
-- [Homebrew's path setting conflict with host binaries · Issue #687 ·
-  ublue-os/bluefin · GitHub][11]
-- [Nix package manager install (single user) on Fedora Silverblue][13]
-- [Nix on Fedora][14]
+- [ساخت تصویر سفارشی فدورا سیلوربلو][5]
+- [راهنما/OSTree - RPM Fusion][6]
+- [Cosign - مستندات سیگ‌استور][4]
+- [ساخت خودتان - یونیورسال بلو][7]
+- [ویژگی: هومبرو بر روی تصویر توسط m2Giles · درخواست کشش #1128 · ublue-os/bazzite ·
+  گیت‌هاب][10]
+- [تعارض تنظیم مسیر هومبرو با باینری‌های میزبان · مسئله #687 ·
+  ublue-os/bluefin · گیت‌هاب][11]
+- [نصب مدیر بسته نیکس (کاربر واحد) بر روی فدورا سیلوربلو][13]
+- [نیکس بر روی فدورا][14]
 
 
 [1]:  https://github.com/aguslr/bluefusion
@@ -84,3 +97,5 @@ References
 [12]: https://nixos.org/download/
 [13]: https://gist.github.com/queeup/1666bc0a5558464817494037d612f094
 [14]: https://gist.github.com/matthewpi/08c3d652e7879e4c4c30bead7021ff73
+
+</div>
