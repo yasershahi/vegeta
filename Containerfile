@@ -94,6 +94,30 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools
+		
+	# Add Microsoft repository for VSCode
+	rpm-ostree install \
+		https://packages.microsoft.com/keys/microsoft.asc \
+		https://packages.microsoft.com/config/rpm/7/prod.repo
+
+	# Install Visual Studio Code
+	rpm-ostree install code
+
+	# Add Google Chrome repository
+	rpm-ostree install \
+		https://dl.google.com/linux/linux_signing_key.pub
+
+	cat <<EOF > /etc/yum.repos.d/google-chrome.repo
+	[google-chrome]
+	name=google-chrome
+	baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
+	gpgcheck=1
+	gpgkey=https://dl.google.com/linux/linux_signing_key.pub
+	enabled=1
+	EOF
+
+	# Install Google Chrome
+	rpm-ostree install google-chrome-stable
 
 	# New commands added here
 	systemctl enable dconf-update.service
