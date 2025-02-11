@@ -41,6 +41,14 @@ RUN <<-'EOT' sh
 	rpm-ostree install rpmfusion-free-release rpmfusion-nonfree-release \
 		--uninstall rpmfusion-free-release \
 		--uninstall rpmfusion-nonfree-release
+		
+	# Remove specified GNOME shell extensions
+	rpm-ostree override remove \
+		gnome-shell-extension-apps-menu \
+		gnome-shell-extension-launch-new-instance \
+		gnome-shell-extension-places-menu \
+		gnome-shell-extension-window-list \
+		gnome-shell-extension-background-logo || true
 
 	(rpm-ostree override remove \
 		ffmpeg-free \
@@ -71,6 +79,21 @@ RUN <<-'EOT' sh
 			;;
 	esac
 	rpm-ostree install libva-nvidia-driver
+	
+	# Install additional packages
+	rpm-ostree install \
+		tailscale \
+		gnome-backgrounds-extras \
+		unrar \
+		p7zip \
+		p7zip-plugins \
+		wireguard-tools \
+		subversion \
+		aria2 \
+		sstp-client \
+		NetworkManager-sstp \
+		NetworkManager-sstp-gnome \
+		net-tools
 
 	# New commands added here
 	systemctl enable dconf-update.service
