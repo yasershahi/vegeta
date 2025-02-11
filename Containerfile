@@ -1,3 +1,6 @@
+# Version Reference
+ARG FEDORA_MAJOR_VERSION=40
+
 # Use the Fedora base image for the builder stage
 FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
 
