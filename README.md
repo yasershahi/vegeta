@@ -1,4 +1,4 @@
-[BlueFusion][1]
+[Vegeta][1]
 ===============
 
 [![build-image](https://github.com/yasershahi/vegeta/actions/workflows/build.yml/badge.svg)](https://github.com/yasershahi/vegeta/actions/workflows/build.yml)
@@ -29,8 +29,8 @@ the following command:
         --volume .:/build-container-installer/build \
         --security-opt label=disable --pull=newer \
         ghcr.io/jasonn3/build-container-installer:latest \
-        IMAGE_REPO="ghcr.io/aguslr" \
-        IMAGE_NAME="bluefusion" \
+        IMAGE_REPO="ghcr.io/yasershahi" \
+        IMAGE_NAME="vegeta" \
         IMAGE_TAG="latest" \
         VARIANT="Silverblue"
 
