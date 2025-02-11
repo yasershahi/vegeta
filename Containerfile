@@ -95,28 +95,9 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp-gnome \
 		net-tools
 		
-	# Add Microsoft repository for VSCode
-	cat <<EOF > /etc/yum.repos.d/vscode.repo
-	[code]
-	name=Visual Studio Code
-	baseurl=https://packages.microsoft.com/yumrepos/vscode
-	gpgcheck=1
-	gpgkey=https://packages.microsoft.com/keys/microsoft.asc
-	enabled=1
-	EOF
 
 	# Install Visual Studio Code
 	rpm-ostree install code
-
-	# Add Google Chrome repository
-	cat <<EOF > /etc/yum.repos.d/google-chrome.repo
-	[google-chrome]
-	name=google-chrome
-	baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
-	gpgcheck=1
-	gpgkey=https://dl.google.com/linux/linux_signing_key.pub
-	enabled=1
-	EOF
 
 	# Install Google Chrome
 	rpm-ostree install google-chrome-stable
