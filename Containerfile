@@ -11,7 +11,7 @@ RUN <<-EOT sh
 	# Install packages
 	dnf install -y git xz --setopt=install_weak_deps=False
 
-	# Instal Homebrew
+	# Install Homebrew
 	case "$(rpm -E %{_arch})" in
 		x86_64)
 			curl -fLs \
@@ -22,34 +22,18 @@ RUN <<-EOT sh
 			mkdir /home/linuxbrew
 			;;
 	esac
-
-	# Add user for nix
-	useradd nix
-	mkdir -m 0755 /nix && chown nix /nix
 EOT
 
-USER nix
-RUN <<-EOT sh
-	set -eu
+FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
 
-	# Install Nix
-	curl -fLs https://nixos.org/nix/install | sh -s -- --no-daemon --yes
-	cp -pr \
-		~/.local/state/nix/profiles/profile-1-link \
-		/nix/var/nix/profiles/default
-EOT
-
-FROM ghcr.io/aguslr/bluevanilla:${FEDORA_MAJOR_VERSION}
-
-COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
-COPY --from=builder --chown=1000:1000 /nix /usr/share/nix
 COPY rootfs/ /
+COPY cosign.pub /etc/pki/containers/
+COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
 RUN <<-'EOT' sh
 	set -eu
 
 	rpm-ostree install gcc make libxcrypt-compat
-	rpm-ostree install distrobox
 
 	rpm-ostree install \
 		https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
@@ -87,6 +71,13 @@ RUN <<-'EOT' sh
 			;;
 	esac
 	rpm-ostree install libva-nvidia-driver
+
+	# New commands added here
+	systemctl enable dconf-update.service
+	systemctl enable flatpak-add-flathub-repo.service
+	systemctl enable flatpak-replace-fedora-apps.service
+	systemctl enable flatpak-cleanup.timer
+	systemctl enable rpm-ostreed-automatic.timer
 
 	rpm-ostree cleanup -m && ostree container commit
 EOT

@@ -2,7 +2,7 @@ name: Build image
 
 on:
   schedule:
-    - cron: '20 21 * * *'  # 9:20pm everyday
+    - cron: '0 0 * * 0'  # Every Sunday at midnight
   pull_request:
     branches:
       - main
@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        major_version: [40, 41]
+        major_version: [41]
         platform:
           - linux/amd64
           - linux/arm64
@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        major_version: [40, 41]
+        major_version: [41]
         include:
           - major_version: 41
             is_latest: true
