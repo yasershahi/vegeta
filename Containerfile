@@ -97,11 +97,9 @@ RUN <<-'EOT' sh
 		net-tools \
 		android-tools \
 		ifuse \
-		liberation-fonts \
-		code
-	
-	# Patch mutter
-	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
+		liberation-fonts-all \
+		code \
+		google-chrome-stable
 
 	# Systemd Services
 	systemctl enable dconf-update.service
