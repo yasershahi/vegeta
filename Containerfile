@@ -98,8 +98,7 @@ RUN <<-'EOT' sh
 		android-tools \
 		ifuse \
 		liberation-fonts \
-		code \
-		google-chrome-stable
+		code
 	
 	# Patch mutter
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
