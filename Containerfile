@@ -98,8 +98,7 @@ RUN <<-'EOT' sh
 		android-tools \
 		ifuse \
 		liberation-fonts-all \
-		code \
-		google-chrome-stable
+		code
 
 	# Systemd Services
 	systemctl enable dconf-update.service
@@ -107,6 +106,11 @@ RUN <<-'EOT' sh
 	systemctl enable flatpak-replace-fedora-apps.service
 	systemctl enable flatpak-cleanup.timer
 	systemctl enable rpm-ostreed-automatic.timer
+
+	rpm-ostree override replace \
+	    --experimental \
+	    --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance \
+	    mutter
 
 	rpm-ostree cleanup -m && ostree container commit
 EOT
