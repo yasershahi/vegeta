@@ -5,8 +5,13 @@ FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
 WORKDIR /tmp
 RUN <<-EOT sh
 	set -eu
+
 	touch /.dockerenv
+
+	# Install packages
 	dnf install -y git xz --setopt=install_weak_deps=False
+
+	# Install Homebrew
 	case "$(rpm -E %{_arch})" in
 		x86_64)
 			curl -fLs \
@@ -26,76 +31,58 @@ COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
 RUN <<-'EOT' sh
-	set -euxo pipefail
+	set -eu
 
-	# Base development tools
 	rpm-ostree install gcc make libxcrypt-compat
 
-	# RPM Fusion setup
 	rpm-ostree install \
 		https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
 		https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-
-	# Remove GNOME extensions without breaking dependencies
-	rpm-ostree override remove \
+	rpm-ostree install rpmfusion-free-release rpmfusion-nonfree-release \
+		--uninstall rpmfusion-free-release \
+		--uninstall rpmfusion-nonfree-release
+		
+	# Remove specified GNOME shell extensions
+	(rpm-ostree override remove \
+		gnome-classic-session \
 		gnome-shell-extension-apps-menu \
 		gnome-shell-extension-launch-new-instance \
 		gnome-shell-extension-places-menu \
 		gnome-shell-extension-window-list \
-		gnome-shell-extension-background-logo
+		gnome-shell-extension-background-logo) || true
 
-	# Multimedia stack
-	rpm-ostree override replace \
-		--remove=ffmpeg-free \
+	(rpm-ostree override remove \
+		ffmpeg-free \
+		libavcodec-free \
+		libavdevice-free \
+		libavfilter-free \
+		libavformat-free \
+		libavutil-free \
+		libpostproc-free \
+		libswresample-free \
+		libswscale-free \
 		--install=ffmpeg \
 		--install=gstreamer1-plugin-libav \
 		--install=gstreamer1-plugins-bad-free-extras \
 		--install=gstreamer1-plugins-bad-freeworld \
 		--install=gstreamer1-plugins-ugly \
-		--install=gstreamer1-vaapi
+		--install=gstreamer1-vaapi) || true
 
-	# Graphics drivers
-	rpm-ostree override replace \
-		--remove=mesa-va-drivers \
+	(rpm-ostree override remove \
+		mesa-va-drivers \
 		--install=mesa-va-drivers-freeworld \
-		--install=mesa-vdpau-drivers-freeworld
+		--install=mesa-vdpau-drivers-freeworld) || true
 
-	# x86_64 specific packages
 	case "$(rpm -E %{_arch})" in
 		x86_64)
-			rpm-ostree install \
-				steam-devices \
-				intel-media-driver \
-				libva-intel-driver
+			rpm-ostree install steam-devices
+			rpm-ostree install intel-media-driver libva-intel-driver
 			;;
 	esac
-
-	# Third-party repos
-	rpm --import https://packages.microsoft.com/keys/microsoft.asc
-	rpm --import https://dl.google.com/linux/linux_signing_key.pub
-
-	cat > /etc/yum.repos.d/vscode.repo <<'EOF'
-[code]
-name=Visual Studio Code
-baseurl=https://packages.microsoft.com/yumrepos/vscode
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.microsoft.com/keys/microsoft.asc
-EOF
-
-	cat > /etc/yum.repos.d/google-chrome.repo <<'EOF'
-[google-chrome]
-name=google-chrome
-baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
-enabled=1
-gpgcheck=1
-gpgkey=https://dl.google.com/linux/linux_signing_key.pub
-EOF
-
-	# Combined package installation
+	rpm-ostree install libva-nvidia-driver
+	
+	# Install additional packages
 	rpm-ostree install \
-		code \
-		google-chrome-stable \
 		tailscale \
 		gnome-backgrounds-extras \
 		unrar \
@@ -108,21 +95,14 @@ EOF
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools \
-		libva-nvidia-driver
+		code
 
-	# Systemd services
-	for service in \
-		dconf-update.service \
-		flatpak-add-flathub-repo.service \
-		flatpak-replace-fedora-apps.service \
-		flatpak-cleanup.timer \
-		rpm-ostreed-automatic.timer
-	do
-		if systemctl list-unit-files | grep -q "^${service}"; then
-			systemctl enable "${service}"
-		fi
-	done
+	# New commands added here
+	systemctl enable dconf-update.service
+	systemctl enable flatpak-add-flathub-repo.service
+	systemctl enable flatpak-replace-fedora-apps.service
+	systemctl enable flatpak-cleanup.timer
+	systemctl enable rpm-ostreed-automatic.timer
 
-	# Final cleanup
-	rpm-ostree cleanup -m
+	rpm-ostree cleanup -m && ostree container commit
 EOT
