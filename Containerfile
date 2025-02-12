@@ -5,13 +5,8 @@ FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
 WORKDIR /tmp
 RUN <<-EOT sh
 	set -eu
-
 	touch /.dockerenv
-
-	# Install packages
 	dnf install -y git xz --setopt=install_weak_deps=False
-
-	# Install Homebrew
 	case "$(rpm -E %{_arch})" in
 		x86_64)
 			curl -fLs \
@@ -31,25 +26,26 @@ COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
 RUN <<-'EOT' sh
-	set -euxo pipefail  # More verbose error handling
+	set -euxo pipefail
 
 	# Base development tools
 	rpm-ostree install gcc make libxcrypt-compat
 
-	# RPM Fusion setup - simplified
+	# RPM Fusion setup
 	rpm-ostree install \
 		https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
 		https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
-	# GNOME extensions cleanup
+	# Remove GNOME extensions and classic session
 	rpm-ostree override remove \
+		gnome-classic-session \
 		gnome-shell-extension-apps-menu \
 		gnome-shell-extension-launch-new-instance \
 		gnome-shell-extension-places-menu \
 		gnome-shell-extension-window-list \
 		gnome-shell-extension-background-logo
 
-	# Multimedia stack - consolidated
+	# Multimedia stack
 	rpm-ostree override replace \
 		--remove=ffmpeg-free \
 		--install=ffmpeg \
@@ -59,13 +55,13 @@ RUN <<-'EOT' sh
 		--install=gstreamer1-plugins-ugly \
 		--install=gstreamer1-vaapi
 
-	# Graphics drivers - fixed ordering
+	# Graphics drivers
 	rpm-ostree override replace \
 		--remove=mesa-va-drivers \
 		--install=mesa-va-drivers-freeworld \
 		--install=mesa-vdpau-drivers-freeworld
 
-	# Hardware-specific packages
+	# x86_64 specific packages
 	case "$(rpm -E %{_arch})" in
 		x86_64)
 			rpm-ostree install \
@@ -75,7 +71,7 @@ RUN <<-'EOT' sh
 			;;
 	esac
 
-	# Add third-party repos first
+	# Third-party repos
 	rpm --import https://packages.microsoft.com/keys/microsoft.asc
 	rpm --import https://dl.google.com/linux/linux_signing_key.pub
 
@@ -115,7 +111,7 @@ EOF
 		net-tools \
 		libva-nvidia-driver
 
-	# Systemd services - validate existence first
+	# Systemd services
 	for service in \
 		dconf-update.service \
 		flatpak-add-flathub-repo.service \
