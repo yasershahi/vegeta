@@ -95,9 +95,16 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools \
-		code
+		android-tools \
+		ifuse \
+		liberation-fonts \
+		code \
+		google-chrome-stable
 	
-	# New commands added here
+	# Patch mutter
+	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
+
+	# Systemd Services
 	systemctl enable dconf-update.service
 	systemctl enable flatpak-add-flathub-repo.service
 	systemctl enable flatpak-replace-fedora-apps.service
@@ -106,8 +113,3 @@ RUN <<-'EOT' sh
 
 	rpm-ostree cleanup -m && ostree container commit
 EOT
-
-	# Patch mutter
-RUN rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
-
-RUN rpm-ostree cleanup -m && ostree container commit
