@@ -96,9 +96,6 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp-gnome \
 		net-tools \
 		code
-
-	# Patch mutter
-	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
 	
 	# New commands added here
 	systemctl enable dconf-update.service
@@ -109,3 +106,8 @@ RUN <<-'EOT' sh
 
 	rpm-ostree cleanup -m && ostree container commit
 EOT
+
+	# Patch mutter
+RUN rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
+
+RUN rpm-ostree cleanup -m && ostree container commit
