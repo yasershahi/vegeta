@@ -95,9 +95,11 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools \
-		code \
-		google-chrome-stable
+		code
 
+	# Patch mutter
+	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance mutter
+	
 	# New commands added here
 	systemctl enable dconf-update.service
 	systemctl enable flatpak-add-flathub-repo.service
