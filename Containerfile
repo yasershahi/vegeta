@@ -36,9 +36,8 @@ RUN <<-'EOT' sh
 		https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
 		https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
-	# Remove GNOME extensions and classic session
+	# Remove GNOME extensions without breaking dependencies
 	rpm-ostree override remove \
-		gnome-classic-session \
 		gnome-shell-extension-apps-menu \
 		gnome-shell-extension-launch-new-instance \
 		gnome-shell-extension-places-menu \
