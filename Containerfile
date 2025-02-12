@@ -31,9 +31,7 @@ COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
 # Add Google Chrome repository and install packages
-RUN dnf install -y fedora-repos-rawhide && \
-    dnf config-manager --set-enabled google-chrome && \
-    dnf install -y liberation-fonts-all google-chrome-stable
+RUN rpm-ostree install google-chrome-stable
 
 RUN <<-'EOT' sh
 	set -eu
