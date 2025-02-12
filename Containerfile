@@ -30,6 +30,9 @@ COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
+#Install Chrome
+RUN rpm-ostree install liberation-fonts-all google-chrome-stable
+
 RUN <<-'EOT' sh
 	set -eu
 
@@ -97,11 +100,11 @@ RUN <<-'EOT' sh
 		net-tools \
 		android-tools \
 		ifuse \
-		liberation-fonts-all \
 		code
 
 	# Patch Gnome Shell
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
+	
 	# Systemd Services
 	systemctl enable dconf-update.service
 	systemctl enable flatpak-add-flathub-repo.service
