@@ -95,7 +95,8 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools \
-		code
+		code \
+		google-chrome-stable
 
 	# New commands added here
 	systemctl enable dconf-update.service
