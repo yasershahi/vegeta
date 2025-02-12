@@ -107,10 +107,5 @@ RUN <<-'EOT' sh
 	systemctl enable flatpak-cleanup.timer
 	systemctl enable rpm-ostreed-automatic.timer
 
-	rpm-ostree override replace \
-	    --experimental \
-	    --from repo=copr:copr.fedorainfracloud.org:yasershahi:mutter-performance \
-	    mutter
-
 	rpm-ostree cleanup -m && ostree container commit
 EOT
