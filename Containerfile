@@ -37,7 +37,7 @@ RUN rpm-ostree install liberation-fonts-all
 
 # Install Google Chrome
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O /tmp/google-chrome.rpm && \
-    rpm-ostree install --verbose /tmp/google-chrome.rpm
+    rpm-ostree install /tmp/google-chrome.rpm
 
 RUN <<-'EOT' sh
 	set -eu
