@@ -106,9 +106,9 @@ RUN <<-'EOT' sh
 	# Install Chrome Unstable for web development testing
 	mv /opt{,.bak} \
     && mkdir /opt \
-    && dnf install -y --enablerepo="google-chrome" google-chrome-stable \
+    && dnf install -y --enablerepo="google-chrome" google-chrome-unstable \
     && mv /opt/google/chrome /usr/lib/google-chrome \
-    && ln -sf /usr/lib/google-chrome/google-chrome /usr/bin/google-chrome-stable \
+    && ln -sf /usr/lib/google-chrome/google-chrome /usr/bin/google-chrome-unstable \
     && mkdir -p /usr/share/icons/hicolor/{16x16/apps,24x24/apps,32x32/apps,48x48/apps,64x64/apps,128x128/apps,256x256/apps} \
     && for i in "16" "24" "32" "48" "64" "128" "256"; do \
         ln -sf /usr/lib/google-chrome/product_logo_$i.png /usr/share/icons/hicolor/${i}x${i}/apps/google-chrome.png; \
