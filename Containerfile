@@ -27,12 +27,13 @@ RUN <<-EOT sh
 	wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O google-chrome.rpm
 
 	# Extract the RPM
-	rpm2cpio google-chrome.rpm | cpio -idmv
+	mkdir -p google-chrome-extracted
+	rpm2cpio google-chrome.rpm | cpio -idmv -D google-chrome-extracted
 
 	# Prepare the files to be copied
-	mkdir -p /tmp/google-chrome && \
-	cp -r ./usr/* /tmp/google-chrome/ && \
-	cp -r ./etc/* /tmp/google-chrome/
+	mkdir -p /tmp/google-chrome/usr /tmp/google-chrome/etc
+	cp -r google-chrome-extracted/usr/* /tmp/google-chrome/usr/
+	cp -r google-chrome-extracted/etc/* /tmp/google-chrome/etc/
 EOT
 
 FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
