@@ -31,6 +31,10 @@ COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
 # Add Google Chrome repository and install packages
+# Install liberation-fonts-all first
+RUN rpm-ostree install liberation-fonts-all
+
+# Install Google Chrome
 RUN rpm-ostree install google-chrome-stable
 
 RUN <<-'EOT' sh
