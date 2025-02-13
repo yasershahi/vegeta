@@ -31,6 +31,13 @@ COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
+#Test chrome
+# Install Google Chrome
+RUN rpm-ostree install liberation-fonts-all
+
+RUN wget https://dl.google.com/linux/direct/google-chrome-unstable_current_x86_64.rpm -O /tmp/google-chrome.rpm && \
+    rpm-ostree install /tmp/google-chrome.rpm
+
 RUN <<-'EOT' sh
 	set -eu
 
@@ -89,11 +96,7 @@ RUN <<-'EOT' sh
 		net-tools \
 		android-tools \
 		ifuse \
-		liberation-fonts-all \
 		code
-
-	# Install Chrome
-	rpm-ostree upgrade --uninstall google-chrome-stable --install google-chrome-stable
 	
 	# Remove specified GNOME shell extensions
 	(rpm-ostree override remove \
