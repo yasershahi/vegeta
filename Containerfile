@@ -34,8 +34,19 @@ COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 # Install liberation-fonts-all first
 RUN rpm-ostree install liberation-fonts-all
 
-# Install Google Chrome
-RUN rpm-ostree install google-chrome-stable
+# Install Google Chrome in its own RUN block
+RUN <<-'EOT' sh
+    set -eu
+
+    # Debugging: Check the repository configuration
+    echo "Checking Google Chrome repository configuration:"
+    cat /etc/yum.repos.d/google-chrome.repo
+
+    # Install Google Chrome
+    echo "Installing Google Chrome..."
+    rpm-ostree install google-chrome-stable
+
+EOT
 
 RUN <<-'EOT' sh
 	set -eu
@@ -48,15 +59,6 @@ RUN <<-'EOT' sh
 	rpm-ostree install rpmfusion-free-release rpmfusion-nonfree-release \
 		--uninstall rpmfusion-free-release \
 		--uninstall rpmfusion-nonfree-release
-		
-	# Remove specified GNOME shell extensions
-	(rpm-ostree override remove \
-		gnome-classic-session \
-		gnome-shell-extension-apps-menu \
-		gnome-shell-extension-launch-new-instance \
-		gnome-shell-extension-places-menu \
-		gnome-shell-extension-window-list \
-		gnome-shell-extension-background-logo) || true
 
 	(rpm-ostree override remove \
 		ffmpeg-free \
@@ -106,6 +108,15 @@ RUN <<-'EOT' sh
 		ifuse \
 		code
 
+	# Remove specified GNOME shell extensions
+	(rpm-ostree override remove \
+		gnome-classic-session \
+		gnome-shell-extension-apps-menu \
+		gnome-shell-extension-launch-new-instance \
+		gnome-shell-extension-places-menu \
+		gnome-shell-extension-window-list \
+		gnome-shell-extension-background-logo) || true
+		
 	# Patch Gnome Shell
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
 	
