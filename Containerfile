@@ -9,7 +9,7 @@ RUN <<-EOT sh
 	touch /.dockerenv
 
 	# Install packages
-	dnf install -y git xz --setopt=install_weak_deps=False
+	dnf install -y git xz wget rpm2cpio cpio --setopt=install_weak_deps=False
 
 	# Install Homebrew
 	case "$(rpm -E %{_arch})" in
@@ -22,6 +22,17 @@ RUN <<-EOT sh
 			mkdir /home/linuxbrew
 			;;
 	esac
+
+	# Download Google Chrome RPM
+	wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O google-chrome.rpm
+
+	# Extract the RPM
+	rpm2cpio google-chrome.rpm | cpio -idmv
+
+	# Prepare the files to be copied
+	mkdir -p /tmp/google-chrome && \
+	cp -r ./usr/* /tmp/google-chrome/ && \
+	cp -r ./etc/* /tmp/google-chrome/
 EOT
 
 FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
@@ -31,13 +42,9 @@ COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
-#Test chrome
-# Install Google Chrome
-RUN rpm-ostree install liberation-fonts-all
-
-# Install Google Chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O /tmp/google-chrome.rpm && \
-    rpm-ostree install /tmp/google-chrome.rpm
+# Copy extracted files from the builder stage
+COPY --from=builder /tmp/google-chrome/usr /usr
+COPY --from=builder /tmp/google-chrome/etc /etc
 
 RUN <<-'EOT' sh
 	set -eu
@@ -97,6 +104,7 @@ RUN <<-'EOT' sh
 		net-tools \
 		android-tools \
 		ifuse \
+		liberation-fonts-all \
 		code
 	
 	# Remove specified GNOME shell extensions
@@ -129,4 +137,5 @@ RUN systemctl enable dconf-update.service && \
     systemctl enable rpm-ostreed-automatic.timer && \
     rpm-ostree cleanup -m && \
     ostree container commit
+
 
