@@ -30,21 +30,14 @@ COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 
-# Add Google Chrome repository and install packages
-# Install liberation-fonts-all first
-RUN rpm-ostree install liberation-fonts-all
-
 # Install Google Chrome in its own RUN block
 RUN <<-'EOT' sh
     set -eu
+    
+    rpm-ostree install liberation-fonts-all
 
-    # Debugging: Check the repository configuration
-    echo "Checking Google Chrome repository configuration:"
-    cat /etc/yum.repos.d/google-chrome.repo
-
-    # Install Google Chrome
-    echo "Installing Google Chrome..."
-    rpm-ostree install google-chrome-stable
+    (rpm-ostree install \
+    		google-chrome-unstable --allow-inactive) || true
 
 EOT
 
