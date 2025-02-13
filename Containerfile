@@ -93,7 +93,7 @@ RUN <<-'EOT' sh
 		code
 
 	# Install Chrome
-	
+	rpm-ostree upgrade --uninstall google-chrome-stable --install google-chrome-stable
 	
 	# Remove specified GNOME shell extensions
 	(rpm-ostree override remove \
