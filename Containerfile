@@ -24,7 +24,7 @@ RUN <<-EOT sh
 	esac
 
 	# Download Google Chrome RPM
-	wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O google-chrome.rpm
+	wget https://dl.google.com/linux/direct/google-chrome-unstable_current_x86_64.rpm -O google-chrome.rpm
 
 	# Extract the RPM
 	mkdir -p google-chrome-extracted
@@ -103,10 +103,24 @@ RUN <<-'EOT' sh
 		NetworkManager-sstp \
 		NetworkManager-sstp-gnome \
 		net-tools \
+		nss-tools \
 		android-tools \
 		ifuse \
 		liberation-fonts-all \
-		code
+		code \
+		fastfetch \
+		ibm-plex-mono-fonts \
+		libimobiledevice \
+		libxcrypt-compat \
+		libsss_autofs \
+		iotop \
+		sysprof \
+		epiphany \
+		dconf-editor \
+		zsh
+		
+		
+		
 	
 	# Remove specified GNOME shell extensions
 	(rpm-ostree override remove \
