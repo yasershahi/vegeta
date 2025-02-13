@@ -1,35 +1,11 @@
 ARG FEDORA_MAJOR_VERSION=41
 
-FROM quay.io/fedora/fedora:${FEDORA_MAJOR_VERSION} AS builder
-
-WORKDIR /tmp
-RUN <<-EOT sh
-	set -eu
-
-	touch /.dockerenv
-
-	# Install packages
-	dnf install -y git xz --setopt=install_weak_deps=False
-
-	# Install Homebrew
-	case "$(rpm -E %{_arch})" in
-		x86_64)
-			curl -fLs \
-				https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s
-			/home/linuxbrew/.linuxbrew/bin/brew update
-			;;
-		*)
-			mkdir /home/linuxbrew
-			;;
-	esac
-EOT
-
 FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
 
 COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
-COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
+COPY scripts/ /tmp/scripts/
 
 RUN <<-'EOT' sh
 	set -eu
@@ -91,7 +67,6 @@ RUN <<-'EOT' sh
 		android-tools \
 		ifuse \
 		liberation-fonts-all \
-		code \
 		fastfetch \
 		ibm-plex-mono-fonts \
 		libimobiledevice \
@@ -102,21 +77,12 @@ RUN <<-'EOT' sh
 		epiphany \
 		dconf-editor \
 		zsh
-		
-	# Install Chrome Unstable for web development testing
-	mv /opt{,.bak} \
-    && mkdir /opt \
-    && dnf install -y --enablerepo="google-chrome" google-chrome-unstable \
-    && mv /opt/google/chrome /usr/lib/google-chrome \
-    && ln -sf /usr/lib/google-chrome/google-chrome /usr/bin/google-chrome-unstable \
-    && mkdir -p /usr/share/icons/hicolor/{16x16/apps,24x24/apps,32x32/apps,48x48/apps,64x64/apps,128x128/apps,256x256/apps} \
-    && for i in "16" "24" "32" "48" "64" "128" "256"; do \
-        ln -sf /usr/lib/google-chrome/product_logo_$i.png /usr/share/icons/hicolor/${i}x${i}/apps/google-chrome.png; \
-    done \
-    && rm -rf /etc/cron.daily \
-    && rmdir /opt/{google,} \
-    && mv /opt{.bak,} \
-    && dnf clean all
+	
+	# Install Scripts
+	chmod +x /tmp/scripts/*.sh /tmp/scripts/*.sh && \
+  /tmp/scripts/setup.sh
+	
+
 		
 	
 	# Remove specified GNOME shell extensions and apps
