@@ -9,7 +9,7 @@ RUN <<-EOT sh
 	touch /.dockerenv
 
 	# Install packages
-	dnf install -y git xz wget rpm2cpio cpio --setopt=install_weak_deps=False
+	dnf install -y git xz --setopt=install_weak_deps=False
 
 	# Install Homebrew
 	case "$(rpm -E %{_arch})" in
@@ -22,18 +22,6 @@ RUN <<-EOT sh
 			mkdir /home/linuxbrew
 			;;
 	esac
-
-	# Download Google Chrome RPM
-	wget https://dl.google.com/linux/direct/google-chrome-unstable_current_x86_64.rpm -O google-chrome.rpm
-
-	# Extract the RPM
-	mkdir -p google-chrome-extracted
-	rpm2cpio google-chrome.rpm | cpio -idmv -D google-chrome-extracted
-
-	# Prepare the files to be copied
-	mkdir -p /tmp/google-chrome/usr /tmp/google-chrome/etc
-	cp -r google-chrome-extracted/usr/* /tmp/google-chrome/usr/
-	cp -r google-chrome-extracted/etc/* /tmp/google-chrome/etc/
 EOT
 
 FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
@@ -42,10 +30,6 @@ COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
-
-# Copy extracted files from the builder stage
-COPY --from=builder /tmp/google-chrome/usr /usr
-COPY --from=builder /tmp/google-chrome/etc /etc
 
 RUN <<-'EOT' sh
 	set -eu
@@ -119,7 +103,20 @@ RUN <<-'EOT' sh
 		dconf-editor \
 		zsh
 		
-		
+	# Install Chrome Unstable for web development testing
+	mv /opt{,.bak} \
+    && mkdir /opt \
+    && dnf install -y --enablerepo="google-chrome" google-chrome-stable \
+    && mv /opt/google/chrome /usr/lib/google-chrome \
+    && ln -sf /usr/lib/google-chrome/google-chrome /usr/bin/google-chrome-stable \
+    && mkdir -p /usr/share/icons/hicolor/{16x16/apps,24x24/apps,32x32/apps,48x48/apps,64x64/apps,128x128/apps,256x256/apps} \
+    && for i in "16" "24" "32" "48" "64" "128" "256"; do \
+        ln -sf /usr/lib/google-chrome/product_logo_$i.png /usr/share/icons/hicolor/${i}x${i}/apps/google-chrome.png; \
+    done \
+    && rm -rf /etc/cron.daily \
+    && rmdir /opt/{google,} \
+    && mv /opt{.bak,} \
+    && dnf clean all
 		
 	
 	# Remove specified GNOME shell extensions
