@@ -26,7 +26,7 @@ curl --retry 3 --retry-delay 2 --retry-all-errors -sL \
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-google
 
 # Install the packages
-dnf install -y google-chrome-stable
+dnf install -y google-chrome-unstable
 
 # Clean up the yum repo
 rm -f /etc/yum.repos.d/google-chrome.repo
@@ -37,9 +37,4 @@ mv /var/opt/google /usr/lib/google
 # Register path symlink
 cat >/usr/lib/tmpfiles.d/eternal-google.conf <<EOF
 L  /opt/google  -  -  -  -  /usr/lib/google
-EOF
-
-# Workaround to remove Google Chrome profile locks
-cat >/usr/share/user-tmpfiles.d/eternal-google-locks.conf <<EOF
-r  %h/.config/google-chrome/Singleton*  -  -  -  -  -
 EOF
