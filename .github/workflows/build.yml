@@ -2,7 +2,7 @@ name: Build image
 
 on:
   schedule:
-    - cron: '0 5 * * *'  # Every day at 5:00 AM UTC
+    - cron: '30 23 * * 6'  # Every Saturday at 11:30 PM UTC (2:30 AM Tehran time on Sunday)
   pull_request:
     branches:
       - main

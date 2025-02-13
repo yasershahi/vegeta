@@ -119,13 +119,16 @@ RUN <<-'EOT' sh
     && dnf clean all
 		
 	
-	# Remove specified GNOME shell extensions
+	# Remove specified GNOME shell extensions and apps
 	(rpm-ostree override remove \
 		gnome-classic-session \
 		gnome-shell-extension-apps-menu \
 		gnome-shell-extension-launch-new-instance \
 		gnome-shell-extension-places-menu \
 		gnome-shell-extension-window-list \
+		gnome-tour \
+		yelp \
+		gnome-software-rpm-ostree \
 		gnome-shell-extension-background-logo) || true
 		
 	# Patch Gnome Shell
