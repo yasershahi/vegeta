@@ -35,8 +35,9 @@ COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
 # Install Google Chrome
 RUN rpm-ostree install liberation-fonts-all
 
-RUN wget https://dl.google.com/linux/direct/google-chrome-unstable_current_x86_64.rpm -O /tmp/google-chrome.rpm && \
-    rpm-ostree install /tmp/google-chrome.rpm
+# Install Google Chrome
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -O /tmp/google-chrome.rpm && \
+    rpm-ostree install --verbose /tmp/google-chrome.rpm
 
 RUN <<-'EOT' sh
 	set -eu
