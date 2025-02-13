@@ -28,18 +28,8 @@ FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
 
 COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
+COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
 COPY --from=builder --chown=1000:1000 /home/linuxbrew /usr/share/homebrew
-
-# Install Google Chrome in its own RUN block
-RUN <<-'EOT' sh
-    set -eu
-    
-    rpm-ostree install liberation-fonts-all
-
-    (rpm-ostree install \
-    		google-chrome-unstable --allow-inactive) || true
-
-EOT
 
 RUN <<-'EOT' sh
 	set -eu
@@ -99,8 +89,12 @@ RUN <<-'EOT' sh
 		net-tools \
 		android-tools \
 		ifuse \
+		liberation-fonts-all \
 		code
 
+	# Install Chrome
+	
+	
 	# Remove specified GNOME shell extensions
 	(rpm-ostree override remove \
 		gnome-classic-session \
@@ -113,12 +107,22 @@ RUN <<-'EOT' sh
 	# Patch Gnome Shell
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
 	
-	# Systemd Services
-	systemctl enable dconf-update.service
-	systemctl enable flatpak-add-flathub-repo.service
-	systemctl enable flatpak-replace-fedora-apps.service
-	systemctl enable flatpak-cleanup.timer
-	systemctl enable rpm-ostreed-automatic.timer
-
-	rpm-ostree cleanup -m && ostree container commit
 EOT
+    
+# Cleanup & Finalize
+RUN rm -rf /tmp/* /var/*
+RUN systemctl enable dconf-update.service && \
+    rm -rf /usr/share/gnome-shell/extensions/background-logo@fedorahosted.org && \
+    rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:phracek:PyCharm.repo && \
+    rm -f /etc/yum.repos.d/fedora-cisco-openh264.repo && \
+    rm -f /etc/yum.repos.d/trixieua-mutter-patched.repo && \
+    systemctl enable flatpak-add-flathub-repo.service && \
+    systemctl enable flatpak-replace-fedora-apps.service && \
+    systemctl enable flatpak-cleanup.timer && \
+    sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf && \
+    sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf && \
+    sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf && \
+    systemctl enable rpm-ostreed-automatic.timer && \
+    rpm-ostree cleanup -m && \
+    ostree container commit
+
