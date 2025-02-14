@@ -76,14 +76,7 @@ RUN <<-'EOT' sh
 		sysprof \
 		epiphany \
 		dconf-editor \
-		zsh
-	
-	# Install Scripts
-	chmod +x /tmp/scripts/*.sh /tmp/scripts/*.sh && \
-  /tmp/scripts/setup.sh
-	
-
-		
+		zsh		
 	
 	# Remove specified GNOME shell extensions and apps
 	(rpm-ostree override remove \
@@ -101,7 +94,11 @@ RUN <<-'EOT' sh
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
 	
 EOT
-    
+ 
+ 	# Install Scripts
+RUN chmod +x /tmp/scripts/*.sh && \
+    /tmp/scripts/setup.sh
+ 
 # Cleanup & Finalize
 RUN rm -rf /tmp/* /var/*
 RUN systemctl enable dconf-update.service && \
