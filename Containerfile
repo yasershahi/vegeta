@@ -12,7 +12,7 @@ RUN <<-'EOT' sh
 
 
 # Install Brew dependencies
-dnf install -y procps-ng curl file git gcc
+dnf install -y procps-ng curl file git gcc zstd
 
 # Convince the installer we are in CI
 touch /.dockerenv
@@ -115,7 +115,6 @@ EOF
 		podman-compose \
 		podmansh \
 		zsh \
-		zstd \
 		vlc \
 		vlc-plugins-all \
 		code \
