@@ -11,7 +11,7 @@ cat << EOF > /etc/yum.repos.d/google-chrome.repo
 name=google-chrome
 baseurl=https://dl.google.com/linux/chrome/rpm/stable/\$basearch
 enabled=1
-gpgcheck=1
+gpgcheck=0
 repo_gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-google
 EOF

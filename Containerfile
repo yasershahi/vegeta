@@ -76,6 +76,7 @@ RUN <<-'EOT' sh
 		sysprof \
 		epiphany \
 		dconf-editor \
+		podman-compose \
 		zsh		
 	
 	# Remove specified GNOME shell extensions and apps
