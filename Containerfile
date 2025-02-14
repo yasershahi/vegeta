@@ -11,6 +11,42 @@ COPY rootfs/usr/lib/systemd/system/ /usr/lib/systemd/system/
 RUN <<-'EOT' sh
 	set -eu
 
+
+# Install Brew dependencies
+dnf install -y procps-ng curl file git gcc
+
+# Convince the installer we are in CI
+touch /.dockerenv
+
+# Make these directories so the script will work
+mkdir -p /var/home /var/roothome
+
+# Check if Homebrew is already installed
+if [[ ! -d "/home/linuxbrew/.linuxbrew" ]]; then
+    curl -Lo /tmp/brew-install https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+    chmod +x /tmp/brew-install
+    /tmp/brew-install
+    tar --zstd -cvf /usr/share/homebrew.tar.zst /home/linuxbrew/.linuxbrew
+else
+    echo "Homebrew already installed, skipping installation."
+fi
+
+# Enable Systemd services
+systemctl enable brew-setup.service
+systemctl enable brew-upgrade.timer
+systemctl enable brew-update.timer
+
+# Clean up installer but keep essential directories
+rm -rf /.dockerenv /tmp/brew-install
+
+# Register path symlink using tmpfiles.d
+cat >/usr/lib/tmpfiles.d/homebrew.conf <<EOF
+d /var/lib/homebrew 0755 1000 1000 - -
+d /var/cache/homebrew 0755 1000 1000 - -
+d /var/home/linuxbrew 0755 1000 1000 - -
+EOF
+
+
 	rpm-ostree install gcc make libxcrypt-compat
 
 	rpm-ostree install \
@@ -78,10 +114,14 @@ RUN <<-'EOT' sh
 		epiphany \
 		dconf-editor \
 		podman-compose \
+		podmansh \
 		zsh \
 		zstd \
 		vlc \
-		vlc-plugins-all
+		vlc-plugins-all \
+		code \
+		gh \
+		git-credential-oauth
 		
 	# Install Chrome Unstable for web development testing
 	mv /opt{,.bak} \
@@ -113,11 +153,26 @@ RUN <<-'EOT' sh
 	# Patch Gnome Shell
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
 	
-	 	# Install Scripts
-chmod +x /tmp/scripts/*.sh && \
-  /tmp/scripts/setup.sh && \
-  /tmp/scripts/cleanup.sh
-	
 EOT
  
+ 
+# Cleanup & Finalize
+RUN rm -rf /tmp/* /var/*
+RUN systemctl enable dconf-update.service && \
+    rm -rf /usr/share/gnome-shell/extensions/background-logo@fedorahosted.org && \
+    rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:phracek:PyCharm.repo && \
+    rm -f /etc/yum.repos.d/fedora-cisco-openh264.repo && \
+    rm -f /etc/yum.repos.d/trixieua-mutter-patched.repo && \
+    rm -f /etc/yum.repos.d/github.repo && \
+    rm -f /etc/yum.repos.d/vscode.repo && \
+    systemctl enable flatpak-add-flathub-repo.service && \
+    systemctl enable flatpak-replace-fedora-apps.service && \
+    systemctl enable flatpak-cleanup.timer && \
+    sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf && \
+    sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf && \
+    sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf && \
+    systemctl enable rpm-ostreed-automatic.timer && \
+    rpm-ostree cleanup -m && \
+    ostree container commit
+
 
