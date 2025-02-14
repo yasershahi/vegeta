@@ -113,9 +113,11 @@ RUN <<-'EOT' sh
 	# Patch Gnome Shell
 	rpm-ostree override replace --experimental --from repo=copr:copr.fedorainfracloud.org:trixieua:mutter-patched gnome-shell mutter mutter-common xorg-x11-server-Xwayland gdm
 	
-EOT
- 
- 	# Install Scripts
-RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/*.sh && \
+	 	# Install Scripts
+chmod +x /tmp/scripts/*.sh && \
   /tmp/scripts/setup.sh && \
   /tmp/scripts/cleanup.sh
+	
+EOT
+ 
+
