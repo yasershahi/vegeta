@@ -6,6 +6,7 @@ COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
 COPY scripts/ /tmp/scripts/
+COPY rootfs/usr/lib/systemd/system/ /usr/lib/systemd/system/
 
 RUN <<-'EOT' sh
 	set -eu
