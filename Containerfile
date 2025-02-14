@@ -77,7 +77,8 @@ RUN <<-'EOT' sh
 		epiphany \
 		dconf-editor \
 		podman-compose \
-		zsh		
+		zsh \
+		zstd
 	
 	# Remove specified GNOME shell extensions and apps
 	(rpm-ostree override remove \
