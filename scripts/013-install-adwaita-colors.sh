@@ -14,3 +14,5 @@ cp -r "$TMP_DIR"/* "$INSTALL_PATH"
 
 rm -rf "$TMP_DIR"
 
+EOF
+
