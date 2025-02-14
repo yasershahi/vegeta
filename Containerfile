@@ -5,7 +5,6 @@ FROM quay.io/fedora/fedora-silverblue:${FEDORA_MAJOR_VERSION}
 COPY rootfs/ /
 COPY cosign.pub /etc/pki/containers/
 COPY rootfs/etc/yum.repos.d/ /etc/yum.repos.d/
-COPY scripts/ /tmp/scripts/
 COPY rootfs/usr/lib/systemd/system/ /usr/lib/systemd/system/
 
 RUN <<-'EOT' sh
