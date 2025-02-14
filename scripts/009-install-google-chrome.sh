@@ -31,10 +31,15 @@ dnf install -y google-chrome-unstable
 # Clean up the yum repo
 rm -f /etc/yum.repos.d/google-chrome.repo
 
-# Move the application to somewhere on the final image
-mv /var/opt/google /usr/lib/google
+# Check if the application directory exists before moving
+if [ -d "/var/opt/google" ]; then
+    mv /var/opt/google /usr/lib/google
+else
+    echo "/var/opt/google does not exist, skipping move."
+fi
 
 # Register path symlink
 cat >/usr/lib/tmpfiles.d/eternal-google.conf <<EOF
 L  /opt/google  -  -  -  -  /usr/lib/google
 EOF
+
