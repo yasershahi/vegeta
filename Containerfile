@@ -14,6 +14,13 @@ RUN <<-'EOT' sh
 # Install Brew dependencies
 dnf install -y procps-ng curl file git gcc zstd
 
+# Install Adwaita Icons
+git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors
+mkdir -p /usr/share/icons
+cp -r /tmp/Adwaita-colors/themes/* /usr/share/icons/
+gtk-update-icon-cache -f /usr/share/icons/Adwaita
+rm -rf /tmp/Adwaita-colors
+
 # Convince the installer we are in CI
 touch /.dockerenv
 
