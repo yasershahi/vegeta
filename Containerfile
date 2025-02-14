@@ -15,14 +15,10 @@ RUN <<-'EOT' sh
 dnf install -y procps-ng curl file git gcc zstd
 
 # Install Adwaita Icons
-git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors
+mkdir -p /tmp/Adwaita-colors/icons && git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors
 
-mkdir -p /usr/share/icons
-mkdir -p /tmp/Adwaita-colors/themes  # Ensure the directory exists to avoid errors
-cp -r /tmp/Adwaita-colors/themes/* /usr/share/icons/ || true  # Prevent failure if empty
-
-gtk-update-icon-cache -f /usr/share/icons/Adwaita
-rm -rf /tmp/Adwaita-colors
+  # Ensure the directory exists to avoid errors
+cp -r /tmp/Adwaita-colors/icons/* /usr/share/icons/ || true  # Prevent failure if empty
 
 
 # Convince the installer we are in CI
@@ -131,7 +127,8 @@ EOF
 		code \
 		gh \
 		git-credential-oauth \
-		scrcpy
+		scrcpy \
+		gnome-tweaks
 		
 	# Install Chrome Unstable for web development testing
 	mv /opt{,.bak} \
