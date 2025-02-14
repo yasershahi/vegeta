@@ -79,7 +79,9 @@ RUN <<-'EOT' sh
 		dconf-editor \
 		podman-compose \
 		zsh \
-		zstd
+		zstd \
+		vlc \
+		vlc-plugins-all
 	
 	# Remove specified GNOME shell extensions and apps
 	(rpm-ostree override remove \

@@ -26,7 +26,6 @@ else
 fi
 
 # Enable Systemd services if they exist
-systemctl daemon-reload
 for service in brew-setup.service brew-upgrade.timer brew-update.timer; do
     if systemctl list-unit-files | grep -q "$service"; then
         systemctl enable "$service"
